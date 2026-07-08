@@ -223,6 +223,37 @@
     .message { font-size: 15px; }
     .spark-icon { font-size: 48px; }
   }
+
+  /* ===== 跳转按钮 ===== */
+  .firework-btn {
+    display: inline-block;
+    margin-top: 30px;
+    padding: 14px 40px;
+    font-size: 18px;
+    font-family: 'ZCOOL KuaiLe', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    color: #fff;
+    background: linear-gradient(135deg, #ff6b9d, #ff4500, #ff8c00);
+    background-size: 200% 200%;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    letter-spacing: 2px;
+    text-decoration: none;
+    animation: btnGlow 2s ease-in-out infinite, fadeInUp 1s 1.4s ease forwards;
+    opacity: 0;
+    transition: transform 0.3s;
+    box-shadow: 0 8px 30px rgba(255, 70, 100, 0.35);
+  }
+  .firework-btn:hover {
+    transform: scale(1.06) translateY(-2px);
+    box-shadow: 0 12px 40px rgba(255, 70, 100, 0.5);
+  }
+  .firework-btn:active { transform: scale(0.97); }
+  @keyframes btnGlow {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
 </style>
 </head>
 <body>
@@ -264,6 +295,8 @@
     <div class="footer-note">
       💫 抖音相识 · 火花不灭
     </div>
+
+    <a href="fireworks.html" class="firework-btn">🎆 点击看烟花 🎆</a>
   </div>
 </div>
 
