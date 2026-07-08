@@ -10,7 +10,7 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    background: #000010;
+    background: #000008;
     overflow: hidden;
     font-family: 'ZCOOL KuaiLe', 'PingFang SC', 'Microsoft YaHei', sans-serif;
     cursor: crosshair;
@@ -25,88 +25,57 @@
     z-index: 1;
   }
 
-  /* ===== 文字叠加层 ===== */
   .overlay {
-    position: fixed;
-    z-index: 10;
-    inset: 0;
+    position: fixed; z-index: 10; inset: 0;
     pointer-events: none;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
   }
 
   .title {
-    font-size: 60px;
-    color: #fff;
-    text-shadow:
-      0 0 30px rgba(255, 180, 50, 0.8),
-      0 0 80px rgba(255, 100, 50, 0.5),
-      0 0 120px rgba(255, 200, 80, 0.3);
+    font-size: 60px; color: #fff;
+    text-shadow: 0 0 30px rgba(255,180,50,0.8), 0 0 80px rgba(255,100,50,0.5);
     animation: titleGlow 2s ease-in-out infinite;
-    letter-spacing: 6px;
-    margin-bottom: 16px;
+    letter-spacing: 6px; margin-bottom: 16px;
   }
   @keyframes titleGlow {
-    0%, 100% { text-shadow: 0 0 30px rgba(255, 180, 50, 0.8), 0 0 80px rgba(255, 100, 50, 0.5); }
-    50% { text-shadow: 0 0 50px rgba(255, 200, 80, 1), 0 0 120px rgba(255, 150, 50, 0.8), 0 0 180px rgba(255, 100, 50, 0.6); }
+    0%,100%{text-shadow:0 0 30px rgba(255,180,50,.8),0 0 80px rgba(255,100,50,.5)}
+    50%{text-shadow:0 0 50px rgba(255,200,80,1),0 0 120px rgba(255,150,50,.8),0 0 180px rgba(255,100,50,.6)}
   }
 
   .subtitle {
-    font-size: 22px;
-    color: rgba(255, 255, 255, 0.75);
-    letter-spacing: 4px;
-    text-shadow: 0 0 15px rgba(255, 180, 100, 0.4);
+    font-size: 22px; color: rgba(255,255,255,.75);
+    letter-spacing: 4px; text-shadow: 0 0 15px rgba(255,180,100,.4);
   }
 
   .hint {
-    position: fixed;
-    bottom: 50px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10;
-    color: rgba(255, 255, 255, 0.45);
-    font-size: 15px;
-    letter-spacing: 2px;
-    animation: hintPulse 2.5s ease-in-out infinite;
+    position: fixed; bottom: 50px; left: 50%;
+    transform: translateX(-50%); z-index: 10;
+    color: rgba(255,255,255,.45); font-size: 15px;
+    letter-spacing: 2px; animation: hintPulse 2.5s ease-in-out infinite;
     pointer-events: none;
   }
   @keyframes hintPulse {
-    0%, 100% { opacity: 0.35; }
-    50% { opacity: 0.8; }
+    0%,100%{opacity:.35} 50%{opacity:.8}
   }
 
-  /* ===== 返回按钮 ===== */
   .back-btn {
-    position: fixed;
-    top: 30px;
-    left: 30px;
-    z-index: 20;
-    padding: 10px 24px;
-    font-size: 15px;
-    font-family: inherit;
-    color: #fff;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 50px;
-    cursor: pointer;
-    letter-spacing: 2px;
-    text-decoration: none;
-    backdrop-filter: blur(10px);
-    transition: all 0.3s;
-    pointer-events: auto;
+    position: fixed; top: 30px; left: 30px; z-index: 20;
+    padding: 10px 24px; font-size: 15px; font-family: inherit;
+    color: #fff; background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.2); border-radius: 50px;
+    cursor: pointer; letter-spacing: 2px; text-decoration: none;
+    backdrop-filter: blur(10px); transition: all .3s; pointer-events: auto;
   }
   .back-btn:hover {
-    background: rgba(255, 255, 255, 0.18);
-    border-color: rgba(255, 255, 255, 0.4);
-    box-shadow: 0 4px 20px rgba(255, 255, 255, 0.15);
+    background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.4);
+    box-shadow: 0 4px 20px rgba(255,255,255,.15);
   }
 
-  @media (max-width: 600px) {
-    .title { font-size: 36px; letter-spacing: 3px; }
-    .subtitle { font-size: 16px; }
-    .back-btn { top: 16px; left: 16px; padding: 8px 18px; font-size: 13px; }
+  @media (max-width:600px) {
+    .title{font-size:36px;letter-spacing:3px}
+    .subtitle{font-size:16px}
+    .back-btn{top:16px;left:16px;padding:8px 18px;font-size:13px}
   }
 </style>
 </head>
@@ -136,377 +105,399 @@ function resize() {
 resize();
 window.addEventListener('resize', resize);
 
-// ========== 工具函数 ==========
 function rand(min, max) { return Math.random() * (max - min) + min; }
 function randInt(min, max) { return Math.floor(rand(min, max + 1)); }
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
-// ========== 颜色调色板 ==========
+// ========== 真实烟花配色 (偏暖，金/橙/红/白) ==========
 const PALETTES = [
-  ['#ff6b9d', '#ff4081', '#ff80ab', '#ff1493', '#ff2d55'],
-  ['#ffd740', '#ffab00', '#ff9100', '#ff6d00', '#ffe57f'],
-  ['#7c4dff', '#536dfe', '#448aff', '#40c4ff', '#18ffff'],
-  ['#69f0ae', '#00e676', '#76ff03', '#b2ff59', '#eeff41'],
-  ['#ff4081', '#ff6e40', '#ffd740', '#69f0ae', '#40c4ff'],
-  ['#ff1744', '#ff9100', '#f50057', '#d500f9', '#2979ff'],
-  ['#ffea00', '#ffc400', '#ff5722', '#e91e63', '#9c27b0'],
+  ['#ffcc00','#ff9900','#ff6600','#ffcc33','#ffecb3','#ffffff'],
+  ['#ff4444','#ff1744','#ff6e40','#ffab00','#ffd740','#fff8e1'],
+  ['#ff6d00','#ff9100','#ffc400','#ffe57f','#ffffff','#ffab40'],
+  ['#f50057','#ff4081','#ff6e40','#ffd740','#ffecb3','#ffffff'],
+  ['#ff1744','#ff3d00','#ff6d00','#ffab00','#ffea00','#fff9c4'],
+  ['#e91e63','#ff5252','#ff6e40','#ffab40','#ffe082','#ffffff'],
+  ['#d50000','#ff6d00','#ffc400','#ffeb3b','#ffffff','#ffcc80'],
 ];
 
-// ========== 粒子类 ==========
-class Particle {
-  constructor(x, y, vx, vy, color, size, life, gravity = 0.05, fade = 0.98) {
-    this.x = x;
-    this.y = y;
-    this.vx = vx;
-    this.vy = vy;
-    this.color = color;
-    this.size = size;
-    this.life = life;
-    this.maxLife = life;
-    this.gravity = gravity;
-    this.fade = fade;
-    this.alpha = 1;
-    this.trail = [];
-    this.hasTrail = Math.random() < 0.4;
-  }
+// ========== 简易粒子 (flat, no object overhead) ==========
+// 粒子的 x,y,vx,vy,size,life,maxLife,gravity,color 存在类型化数组中
+const MAX_PARTICLES = 2000;
+const pData = new Float32Array(MAX_PARTICLES * 9); // x,y,vx,vy,size,life,maxLife,gravity,_pad
+const pColors = new Array(MAX_PARTICLES);           // color string
+let pCount = 0;
 
-  update() {
-    this.trail.push({ x: this.x, y: this.y, alpha: this.alpha });
-    if (this.trail.length > 6) this.trail.shift();
-
-    this.x += this.vx;
-    this.vy += this.gravity;
-    this.y += this.vy;
-    this.vx *= 0.99;
-    this.life--;
-    this.alpha = this.life / this.maxLife;
-  }
-
-  draw(ctx) {
-    // 拖尾
-    if (this.hasTrail && this.trail.length > 1) {
-      for (let i = 0; i < this.trail.length - 1; i++) {
-        const t = this.trail[i];
-        const progress = i / this.trail.length;
-        ctx.beginPath();
-        ctx.moveTo(t.x, t.y);
-        ctx.lineTo(this.trail[i + 1].x, this.trail[i + 1].y);
-        ctx.strokeStyle = this.color.replace(')', `, ${progress * 0.5})`).replace('rgb', 'rgba');
-        if (this.color.startsWith('#')) {
-          ctx.strokeStyle = this.color + Math.floor(progress * 80).toString(16).padStart(2, '0');
-        }
-        ctx.lineWidth = this.size * progress * 0.6;
-        ctx.lineCap = 'round';
-        ctx.stroke();
-      }
-    }
-
-    // 主体光点
-    ctx.save();
-    ctx.globalAlpha = this.alpha;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-    ctx.fillStyle = this.color;
-    ctx.fill();
-
-    // 光晕
-    const glow = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 3);
-    glow.addColorStop(0, this.color);
-    glow.addColorStop(0.4, this.color.replace(')', ', 0.4)').replace('rgb', 'rgba'));
-    if (this.color.startsWith('#')) {
-      // handle hex
-      glow.addColorStop(0.4, 'transparent');
-    }
-    glow.addColorStop(1, 'transparent');
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.size * 3, 0, Math.PI * 2);
-    ctx.fillStyle = glow;
-    ctx.fill();
-
-    ctx.restore();
-  }
-
-  get dead() { return this.life <= 0; }
+function spawnParticle(x, y, vx, vy, color, size, life, gravity) {
+  if (pCount >= MAX_PARTICLES) return;
+  const i = pCount++;
+  const off = i * 9;
+  pData[off] = x;
+  pData[off + 1] = y;
+  pData[off + 2] = vx;
+  pData[off + 3] = vy;
+  pData[off + 4] = size;
+  pData[off + 5] = life;
+  pData[off + 6] = life; // maxLife
+  pData[off + 7] = gravity;
+  pColors[i] = color;
 }
 
 // ========== 烟花火箭 ==========
 class Rocket {
   constructor(x, targetY) {
     this.x = x;
-    this.y = H;
-    this.targetY = targetY || rand(H * 0.1, H * 0.55);
-    this.vx = rand(-1.5, 1.5);
-    this.vy = rand(-16, -20);
+    this.y = H + 10;
+    this.targetY = targetY || rand(H * 0.1, H * 0.5);
+    this.vy = rand(-18, -22);
+    this.vx = rand(-0.8, 0.8);
     this.color = pick(pick(PALETTES));
-    this.trailParticles = [];
+    this.palette = pick(PALETTES);
+    this.trail = [];     // {x, y}
+    this.trailMax = 18;
     this.exploded = false;
-    this.type = pick(['circle', 'willow', 'ring', 'heart', 'double', 'star']);
+    this.type = pick(['peony','willow','ring','heart','chrysanthemum','double']);
+    this.born = performance.now();
   }
 
   update() {
-    if (this.exploded) return;
-
-    this.vy += 0.08; // 轻微重力
+    if (this.exploded) return null;
     this.x += this.vx;
+    this.vy += 0.06;
     this.y += this.vy;
 
-    // 尾迹
-    if (Math.random() < 0.7) {
-      this.trailParticles.push(new Particle(
-        this.x + rand(-2, 2), this.y + rand(-2, 2),
-        rand(-0.3, 0.3), rand(0.5, 2),
-        this.color, rand(1.5, 3), randInt(15, 25), 0.02, 0.95
-      ));
+    // 发射尾烟 (简单的灰白拖尾点)
+    if (Math.random() < 0.55) {
+      spawnParticle(
+        this.x + rand(-1.5, 1.5), this.y + rand(-1.5, 1.5),
+        rand(-0.2, 0.2), rand(0.3, 1.2),
+        '#ffcc80', rand(1.2, 2.5), randInt(10, 20), 0.01
+      );
     }
 
-    // 到达顶点时爆炸
     if (this.vy >= 0 || this.y <= this.targetY) {
       this.exploded = true;
       return this.explode();
     }
-    return [];
+    return null;
   }
 
   explode() {
-    const particles = [];
-    const count = randInt(80, 160);
-    const palette = pick(PALETTES);
+    const list = [];
+    const cx = this.x, cy = this.y;
+    const total = randInt(60, 120);
+    const pal = this.palette;
 
+    // === 中心闪光 (少量亮白粒子) ===
+    for (let i = 0; i < 12; i++) {
+      const a = rand(0, Math.PI * 2);
+      const s = rand(0.5, 2);
+      list.push([cx + Math.cos(a) * s, cy + Math.sin(a) * s,
+        Math.cos(a) * rand(0.3, 1.5), Math.sin(a) * rand(0.3, 1.5),
+        '#ffffff', rand(1.5, 3), randInt(5, 15), 0.01]);
+    }
+
+    // === 主体烟花 ===
     switch (this.type) {
-      case 'circle':
-        for (let i = 0; i < count; i++) {
-          const angle = rand(0, Math.PI * 2);
-          const speed = rand(1.5, 8);
-          particles.push(new Particle(
-            this.x, this.y,
-            Math.cos(angle) * speed, Math.sin(angle) * speed,
-            pick(palette), rand(1.8, 4.5), randInt(40, 90), 0.04, 0.97
-          ));
+      case 'peony': // 牡丹 - 经典球形均匀散射
+        for (let i = 0; i < total; i++) {
+          const a = rand(0, Math.PI * 2);
+          const s = rand(2, 9);
+          list.push([cx, cy, Math.cos(a) * s, Math.sin(a) * s,
+            pick(pal), rand(1.8, 4.2), randInt(45, 95), 0.04]);
         }
         break;
 
-      case 'willow':
-        for (let i = 0; i < count; i++) {
-          const angle = rand(0, Math.PI * 2);
-          const speed = rand(1, 7);
-          particles.push(new Particle(
-            this.x, this.y,
-            Math.cos(angle) * speed, Math.sin(angle) * speed * 0.7 - rand(1, 4),
-            pick(palette), rand(1.5, 3.5), randInt(60, 130), 0.07, 0.985
-          ));
+      case 'willow': // 垂柳 - 抛物线落下
+        for (let i = 0; i < total; i++) {
+          const a = rand(0, Math.PI * 2);
+          const s = rand(1.5, 7);
+          list.push([cx, cy, Math.cos(a) * s * 0.9,
+            Math.sin(a) * s * 0.5 - rand(0.5, 2.5),
+            pick(pal), rand(1.5, 3), randInt(70, 150), 0.08]);
         }
         break;
 
-      case 'ring':
-        for (let i = 0; i < count; i++) {
-          const angle = (Math.PI * 2 / count) * i;
-          const speed = rand(4, 7);
-          particles.push(new Particle(
-            this.x, this.y,
-            Math.cos(angle) * speed, Math.sin(angle) * speed,
-            pick(palette), rand(2, 4), randInt(45, 85), 0.03, 0.975
-          ));
+      case 'ring': // 圆环
+        for (let i = 0; i < total; i++) {
+          const a = (Math.PI * 2 / total) * i + rand(-0.04, 0.04);
+          const s = rand(5.5, 8.5);
+          list.push([cx, cy, Math.cos(a) * s, Math.sin(a) * s,
+            pick(pal), rand(2, 3.5), randInt(50, 90), 0.03]);
         }
         break;
 
-      case 'heart':
-        for (let i = 0; i < count; i++) {
-          const t = (Math.PI * 2 / count) * i;
-          // 心形参数方程
-          const scale = rand(3, 7);
+      case 'heart': // 心形
+        for (let i = 0; i < total; i++) {
+          const t = (Math.PI * 2 / total) * i;
           const px = 16 * Math.pow(Math.sin(t), 3);
           const py = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
-          particles.push(new Particle(
-            this.x, this.y,
-            px * scale * 0.08, py * scale * 0.08,
-            pick(palette), rand(1.5, 3.5), randInt(40, 80), 0.04, 0.97
-          ));
+          const s = rand(0.06, 0.1);
+          list.push([cx, cy, px * s, py * s,
+            pick(pal), rand(1.5, 3.5), randInt(45, 85), 0.04]);
         }
         break;
 
-      case 'double':
-        // 外层
-        for (let i = 0; i < count / 2; i++) {
-          const angle = rand(0, Math.PI * 2);
-          const speed = rand(5, 9);
-          particles.push(new Particle(
-            this.x, this.y,
-            Math.cos(angle) * speed, Math.sin(angle) * speed,
-            pick(palette), rand(2, 4), randInt(30, 60), 0.05, 0.96
-          ));
-        }
-        // 内层（延迟爆发感：通过初始速度更小来模拟）
-        for (let i = 0; i < count / 2; i++) {
-          const angle = rand(0, Math.PI * 2);
-          const speed = rand(1.5, 4);
-          particles.push(new Particle(
-            this.x, this.y,
-            Math.cos(angle) * speed, Math.sin(angle) * speed,
-            pick(PALETTES[randInt(0, PALETTES.length - 1)]), rand(2.5, 5), randInt(50, 100), 0.03, 0.98
-          ));
+      case 'chrysanthemum': // 菊花 - 先喷射再散开（长拖尾）
+        for (let i = 0; i < total; i++) {
+          const a = rand(0, Math.PI * 2);
+          const s = rand(3, 8);
+          list.push([cx, cy, Math.cos(a) * s, Math.sin(a) * s,
+            pick(pal), rand(1.5, 3.5), randInt(60, 120), 0.06]);
         }
         break;
 
-      case 'star':
-        const points = 5 + randInt(0, 4);
-        for (let p = 0; p < points; p++) {
-          const baseAngle = (Math.PI * 2 / points) * p;
-          for (let j = 0; j < count / points; j++) {
-            const spread = rand(-0.15, 0.15);
-            const angle = baseAngle + spread;
-            const speed = rand(3, 8);
-            particles.push(new Particle(
-              this.x, this.y,
-              Math.cos(angle) * speed, Math.sin(angle) * speed,
-              pick(palette), rand(1.5, 3.5), randInt(35, 75), 0.04, 0.97
-            ));
-          }
+      case 'double': // 双层 - 外圈 + 内圈
+        for (let i = 0; i < total / 2; i++) {
+          const a = rand(0, Math.PI * 2);
+          const s = rand(6, 10);
+          list.push([cx, cy, Math.cos(a) * s, Math.sin(a) * s,
+            pick(pal), rand(2, 3.5), randInt(35, 65), 0.05]);
+        }
+        for (let i = 0; i < total / 2; i++) {
+          const a = rand(0, Math.PI * 2);
+          const s = rand(1.5, 4);
+          list.push([cx, cy, Math.cos(a) * s, Math.sin(a) * s,
+            pick(pick(PALETTES)), rand(2.5, 5), randInt(55, 105), 0.03]);
         }
         break;
     }
 
-    return particles;
+    return list;
   }
 
   draw(ctx) {
-    // 火箭主体
+    if (this.exploded) return;
+    // 火箭本体 — 亮白点 + 光晕
     ctx.save();
     ctx.beginPath();
     ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
     ctx.fillStyle = '#fff';
-    ctx.fill();
-    const glow = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 10);
-    glow.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
-    glow.addColorStop(0.5, this.color);
-    glow.addColorStop(1, 'transparent');
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 10, 0, Math.PI * 2);
-    ctx.fillStyle = glow;
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur = 12;
     ctx.fill();
     ctx.restore();
+
+    // 发射管拖尾 (简单的线段)
+    if (this.trail.length > 1) {
+      ctx.save();
+      ctx.globalAlpha = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(this.trail[0].x, this.trail[0].y);
+      for (let i = 1; i < this.trail.length; i++) {
+        ctx.lineTo(this.trail[i].x, this.trail[i].y);
+      }
+      ctx.strokeStyle = this.color;
+      ctx.lineWidth = 1.5;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+      ctx.restore();
+    }
   }
 }
 
-// ========== 场景管理 ==========
+// ========== 场景 ==========
 const rockets = [];
-let particles = [];
 
-// 自动发射烟花
+// 自动发射
 let autoTimer = 0;
-let autoInterval = rand(25, 50);
+let autoInterval = rand(30, 55);
 
-function autoLaunch() {
-  const x = rand(W * 0.08, W * 0.92);
-  const targetY = rand(H * 0.08, H * 0.45);
-  rockets.push(new Rocket(x, targetY));
+function launchOne() {
+  rockets.push(new Rocket(rand(W * 0.08, W * 0.92), rand(H * 0.08, H * 0.45)));
 }
 
-// 批量发射（烟花雨）
-function launchSalvo(count = 5) {
+function launchSalvo(count) {
   for (let i = 0; i < count; i++) {
     setTimeout(() => {
-      const x = rand(W * 0.05, W * 0.95);
-      rockets.push(new Rocket(x, rand(H * 0.06, H * 0.4)));
-    }, i * rand(80, 250));
+      rockets.push(new Rocket(rand(W * 0.05, W * 0.95), rand(H * 0.06, H * 0.4)));
+    }, i * rand(60, 200));
   }
 }
 
-// 点击放烟花
+// 点击
 canvas.addEventListener('click', (e) => {
-  const x = e.clientX;
-  const r = new Rocket(x, rand(H * 0.08, H * 0.4));
-  r.type = pick(['circle', 'willow', 'ring', 'heart', 'double', 'star']);
-  rockets.push(r);
-
-  // 同时在附近发射额外烟花
-  for (let i = 0; i < 3; i++) {
-    setTimeout(() => {
-      const ox = x + rand(-120, 120);
-      rockets.push(new Rocket(
-        Math.max(10, Math.min(W - 10, ox)),
-        rand(H * 0.08, H * 0.4)
-      ));
-    }, rand(100, 400));
-  }
+  rockets.push(new Rocket(e.clientX, rand(H * 0.08, H * 0.4)));
+  // 侧边补充1发
+  setTimeout(() => {
+    rockets.push(new Rocket(e.clientX + rand(-80, 80), rand(H * 0.08, H * 0.4)));
+  }, 150);
 });
 
-// 触摸支持
 canvas.addEventListener('touchstart', (e) => {
   e.preventDefault();
-  const touch = e.touches[0];
-  const x = touch.clientX;
-  const r = new Rocket(x, rand(H * 0.08, H * 0.4));
-  r.type = pick(['circle', 'willow', 'ring', 'heart', 'double', 'star']);
-  rockets.push(r);
+  const x = e.touches[0].clientX;
+  rockets.push(new Rocket(x, rand(H * 0.08, H * 0.4)));
 }, { passive: false });
 
-// ========== 渲染循环 ==========
-function animate() {
-  requestAnimationFrame(animate);
+// ========== 颜色亮度的快速计算 (缓存) ==========
+const glowCache = new Map();
+function glowColor(hex, alpha) {
+  const key = hex + alpha;
+  if (glowCache.has(key)) return glowCache.get(key);
+  const r = parseInt(hex.slice(1,3), 16);
+  const g = parseInt(hex.slice(3,5), 16);
+  const b = parseInt(hex.slice(5,7), 16);
+  const result = `rgba(${r},${g},${b},${alpha})`;
+  if (glowCache.size < 500) glowCache.set(key, result);
+  return result;
+}
 
-  // 半透明背景覆盖，产生拖尾/余烬效果
-  ctx.fillStyle = 'rgba(0, 0, 16, 0.18)';
+// ========== 渲染循环 ==========
+// 预创建星空背景
+const bgStars = [];
+for (let i = 0; i < 60; i++) {
+  bgStars.push({
+    x: rand(0, 2000), y: rand(0, 2000),
+    r: rand(0.3, 1.2), twinkle: rand(0, Math.PI * 2)
+  });
+}
+
+let frameCount = 0;
+
+function animate(time) {
+  requestAnimationFrame(animate);
+  frameCount++;
+
+  // === 清屏: 深色夜空 + 极淡烟雾残留 ===
+  ctx.fillStyle = 'rgba(0, 0, 10, 0.22)';
   ctx.fillRect(0, 0, W, H);
 
-  // 自动发射
+  // === 背景星星 (微弱静态，不闪烁以省性能) ===
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  for (let i = 0; i < bgStars.length; i++) {
+    const s = bgStars[i];
+    const sx = s.x % W, sy = s.y % H;
+    ctx.globalAlpha = 0.35 + Math.sin(frameCount * 0.02 + s.twinkle) * 0.25;
+    ctx.beginPath();
+    ctx.arc(sx, sy, s.r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  // === 自动发射 ===
   autoTimer++;
   if (autoTimer >= autoInterval) {
     autoTimer = 0;
-    autoInterval = rand(18, 45);
-    autoLaunch();
-    // 偶尔来一波齐射
-    if (Math.random() < 0.15) {
-      launchSalvo(randInt(3, 8));
-    }
+    autoInterval = rand(22, 50);
+    launchOne();
+    if (Math.random() < 0.12) launchSalvo(randInt(3, 6));
   }
 
-  // 更新火箭
-  const activeRockets = [];
-  for (const rocket of rockets) {
-    if (!rocket.exploded) {
-      // 绘制尾迹
-      for (const tp of rocket.trailParticles) {
-        tp.update();
-        tp.draw(ctx);
-      }
-      rocket.trailParticles = rocket.trailParticles.filter(tp => !tp.dead);
+  // === 更新火箭 & 爆炸 ===
+  const active = [];
+  for (let i = 0; i < rockets.length; i++) {
+    const r = rockets[i];
+    // 尾烟轨迹
+    r.trail.push({ x: r.x, y: r.y });
+    if (r.trail.length > r.trailMax) r.trail.shift();
 
-      const newParticles = rocket.update();
-      if (newParticles && newParticles.length > 0) {
-        particles.push(...newParticles);
+    const spawns = r.update();
+    if (spawns) {
+      for (let j = 0; j < spawns.length; j++) {
+        const s = spawns[j];
+        spawnParticle(s[0], s[1], s[2], s[3], s[4], s[5], s[6], s[7]);
       }
-      rocket.draw(ctx);
     }
-    if (!rocket.exploded) {
-      activeRockets.push(rocket);
-    }
+    r.draw(ctx);
+    if (!r.exploded) active.push(r);
   }
   rockets.length = 0;
-  rockets.push(...activeRockets);
+  rockets.push(...active);
 
-  // 更新粒子
-  const aliveParticles = [];
-  for (const p of particles) {
-    p.update();
-    p.draw(ctx);
-    if (!p.dead) aliveParticles.push(p);
+  // === 更新粒子 (批量，无对象分配) ===
+  let writeIdx = 0;
+  for (let i = 0; i < pCount; i++) {
+    const off = i * 9;
+    const vx = pData[off + 2];
+    const vy = pData[off + 3];
+    const gravity = pData[off + 7];
+    const life = pData[off + 5];
+
+    pData[off] += vx;
+    pData[off + 1] += vy;
+    pData[off + 3] += gravity;
+    pData[off + 2] *= 0.995;
+    pData[off + 5] -= 1;
+
+    if (life <= 1) continue; // dead, skip
+
+    // 如果粒子没死，compact 到前面
+    if (writeIdx !== i) {
+      const wo = writeIdx * 9;
+      pData[wo] = pData[off];
+      pData[wo + 1] = pData[off + 1];
+      pData[wo + 2] = pData[off + 2];
+      pData[wo + 3] = pData[off + 3];
+      pData[wo + 4] = pData[off + 4];
+      pData[wo + 5] = pData[off + 5];
+      pData[wo + 6] = pData[off + 6];
+      pData[wo + 7] = pData[off + 7];
+      pColors[writeIdx] = pColors[i];
+    }
+    writeIdx++;
   }
-  particles = aliveParticles;
+  pCount = writeIdx;
+
+  // === 绘制粒子 (按颜色批次绘制以减少 state change) ===
+  // 先绘制主光点
+  for (let i = 0; i < pCount; i++) {
+    const off = i * 9;
+    const x = pData[off];
+    const y = pData[off + 1];
+    const size = pData[off + 4];
+    const life = pData[off + 5];
+    const maxLife = pData[off + 6];
+    const alpha = Math.max(0, life / maxLife);
+
+    // 跳过视野外的
+    if (x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
+
+    const color = pColors[i];
+    const r = size * alpha; // 粒子随生命缩小
+
+    // 外层光晕 (柔和)
+    ctx.globalAlpha = alpha * 0.25;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x, y, r * 2.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 中层光晕
+    ctx.globalAlpha = alpha * 0.5;
+    ctx.beginPath();
+    ctx.arc(x, y, r * 1.3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 核心亮点
+    ctx.globalAlpha = alpha;
+    ctx.beginPath();
+    ctx.arc(x, y, r * 0.5, 0, Math.PI * 2);
+    ctx.fillStyle = '#fff';
+    ctx.fill();
+
+    // 主体色
+    ctx.globalAlpha = alpha * 0.85;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  // === 性能监控: 粒子过多时降低生成率 ===
+  if (pCount > 1500) {
+    autoInterval = Math.max(autoInterval, 35);
+  }
 }
 
-// ========== 开场连发烟花雨 ==========
+// ========== 开场 ==========
 function openingShow() {
-  const waves = 5;
-  for (let w = 0; w < waves; w++) {
-    setTimeout(() => {
-      launchSalvo(randInt(6, 12));
-    }, w * 900);
+  for (let w = 0; w < 4; w++) {
+    setTimeout(() => launchSalvo(randInt(5, 10)), w * 800);
   }
 }
-
-// 启动
-setTimeout(openingShow, 400);
-animate();
+setTimeout(openingShow, 500);
+requestAnimationFrame(animate);
 
 console.log('🎆 烟花雨已就绪 — 点击屏幕放烟花！');
 console.log('💕 100天火花纪念 — 这一场烟花，只为你绽放');
