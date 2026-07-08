@@ -120,18 +120,24 @@ const PALETTES = [
   ['#d50000','#ff6d00','#ffc400','#ffeb3b','#ffffff','#ffcc80'],
 ];
 
-// ========== 音效引擎 (Web Audio API 合成) ==========
+// ========== 音效引擎 ==========
 let audioCtx = null;
 function initAudio() {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   }
-  if (audioCtx.state === 'suspended') audioCtx.resume();
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume().catch(() => {});
+  }
+}
+// 仅返回音频是否已激活
+function audioReady() {
+  return audioCtx && audioCtx.state === 'running';
 }
 
 // 发射音效 — 渐升的咻声
 function playLaunch() {
-  if (!audioCtx) return;
+  if (!audioReady()) return;
   const t = audioCtx.currentTime;
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
@@ -150,7 +156,7 @@ function playLaunch() {
 
 // 爆炸音效 — 低频轰 + 中频沙沙
 function playExplosion(intensity = 1) {
-  if (!audioCtx) return;
+  if (!audioReady()) return;
   const t = audioCtx.currentTime;
   const dur = 0.6 + intensity * 0.3;
 
@@ -197,7 +203,7 @@ function playExplosion(intensity = 1) {
 
 // 小的噼啪尾音
 function playCrackle(count = 8) {
-  if (!audioCtx) return;
+  if (!audioReady()) return;
   const t = audioCtx.currentTime;
   for (let i = 0; i < count; i++) {
     const ct = t + Math.random() * 0.5;
@@ -413,9 +419,19 @@ function launchSalvo(count) {
   }
 }
 
-// 首次交互恢复音频（浏览器自动播放限制）
-document.addEventListener('click', () => initAudio(), { once: true });
-document.addEventListener('touchstart', () => initAudio(), { once: true });
+// 首次交互激活音频
+function activateAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume().then(() => {
+      console.log('🔊 音频已激活');
+    });
+  }
+}
+document.addEventListener('click', activateAudio, { once: true });
+document.addEventListener('touchstart', activateAudio, { once: true });
 
 // 点击
 canvas.addEventListener('click', (e) => {
