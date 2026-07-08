@@ -120,6 +120,100 @@ const PALETTES = [
   ['#d50000','#ff6d00','#ffc400','#ffeb3b','#ffffff','#ffcc80'],
 ];
 
+// ========== 音效引擎 (Web Audio API 合成) ==========
+let audioCtx = null;
+function initAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+// 发射音效 — 渐升的咻声
+function playLaunch() {
+  if (!audioCtx) return;
+  const t = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(120, t);
+  osc.frequency.exponentialRampToValueAtTime(600, t + 0.25);
+  osc.frequency.exponentialRampToValueAtTime(1600, t + 0.5);
+  gain.gain.setValueAtTime(0.06, t);
+  gain.gain.exponentialRampToValueAtTime(0.1, t + 0.1);
+  gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start(t);
+  osc.stop(t + 0.5);
+}
+
+// 爆炸音效 — 低频轰 + 中频沙沙
+function playExplosion(intensity = 1) {
+  if (!audioCtx) return;
+  const t = audioCtx.currentTime;
+  const dur = 0.6 + intensity * 0.3;
+
+  // 低频轰鸣 (用方波+过滤模拟)
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  const filter = audioCtx.createBiquadFilter();
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(80, t);
+  osc.frequency.exponentialRampToValueAtTime(20, t + dur);
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(200, t);
+  filter.frequency.exponentialRampToValueAtTime(40, t + dur);
+  gain.gain.setValueAtTime(0.15 * intensity, t);
+  gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  osc.connect(filter);
+  filter.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start(t);
+  osc.stop(t + dur);
+
+  // 高频噼啪 (噪声模拟)
+  const bufSize = Math.floor(audioCtx.sampleRate * 0.25);
+  const noiseBuf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+  const data = noiseBuf.getChannelData(0);
+  for (let i = 0; i < bufSize; i++) {
+    data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufSize, 3);
+  }
+  const noise = audioCtx.createBufferSource();
+  const noiseGain = audioCtx.createGain();
+  const noiseFilter = audioCtx.createBiquadFilter();
+  noise.buffer = noiseBuf;
+  noiseFilter.type = 'bandpass';
+  noiseFilter.frequency.setValueAtTime(3000, t);
+  noiseFilter.frequency.exponentialRampToValueAtTime(600, t + 0.2);
+  noiseGain.gain.setValueAtTime(0.06 * intensity, t);
+  noiseGain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+  noise.connect(noiseFilter);
+  noiseFilter.connect(noiseGain);
+  noiseGain.connect(audioCtx.destination);
+  noise.start(t);
+  noise.stop(t + 0.25);
+}
+
+// 小的噼啪尾音
+function playCrackle(count = 8) {
+  if (!audioCtx) return;
+  const t = audioCtx.currentTime;
+  for (let i = 0; i < count; i++) {
+    const ct = t + Math.random() * 0.5;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(800 + Math.random() * 3000, ct);
+    gain.gain.setValueAtTime(0.02, ct);
+    gain.gain.exponentialRampToValueAtTime(0.001, ct + 0.04);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(ct);
+    osc.stop(ct + 0.04);
+  }
+}
+
 // ========== 简易粒子 (flat, no object overhead) ==========
 // 粒子的 x,y,vx,vy,size,life,maxLife,gravity,color 存在类型化数组中
 const MAX_PARTICLES = 2000;
@@ -152,11 +246,14 @@ class Rocket {
     this.vx = rand(-0.8, 0.8);
     this.color = pick(pick(PALETTES));
     this.palette = pick(PALETTES);
-    this.trail = [];     // {x, y}
+    this.trail = [];
     this.trailMax = 18;
     this.exploded = false;
     this.type = pick(['peony','willow','ring','heart','chrysanthemum','double']);
     this.born = performance.now();
+    // 发射音效
+    initAudio();
+    playLaunch();
   }
 
   update() {
@@ -176,6 +273,8 @@ class Rocket {
 
     if (this.vy >= 0 || this.y <= this.targetY) {
       this.exploded = true;
+      playExplosion(0.7 + Math.random() * 0.6);
+      if (Math.random() < 0.5) playCrackle(randInt(5, 14));
       return this.explode();
     }
     return null;
@@ -314,10 +413,13 @@ function launchSalvo(count) {
   }
 }
 
+// 首次交互恢复音频（浏览器自动播放限制）
+document.addEventListener('click', () => initAudio(), { once: true });
+document.addEventListener('touchstart', () => initAudio(), { once: true });
+
 // 点击
 canvas.addEventListener('click', (e) => {
   rockets.push(new Rocket(e.clientX, rand(H * 0.08, H * 0.4)));
-  // 侧边补充1发
   setTimeout(() => {
     rockets.push(new Rocket(e.clientX + rand(-80, 80), rand(H * 0.08, H * 0.4)));
   }, 150);

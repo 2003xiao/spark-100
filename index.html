@@ -381,8 +381,30 @@ for (let i = 0; i < 25; i++) {
   heartsContainer.appendChild(heart);
 }
 
+// ===== 音频初始化 =====
+let sparkAudio = null;
+function playSparkle() {
+  if (!sparkAudio) {
+    sparkAudio = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (sparkAudio.state === 'suspended') sparkAudio.resume();
+  const t = sparkAudio.currentTime;
+  const osc = sparkAudio.createOscillator();
+  const gain = sparkAudio.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(1200 + Math.random() * 800, t);
+  osc.frequency.exponentialRampToValueAtTime(600 + Math.random() * 400, t + 0.15);
+  gain.gain.setValueAtTime(0.04, t);
+  gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+  osc.connect(gain);
+  gain.connect(sparkAudio.destination);
+  osc.start(t);
+  osc.stop(t + 0.15);
+}
+
 // ===== 点击出现火花 =====
 document.addEventListener('click', (e) => {
+  playSparkle();
   const spark = document.createElement('div');
   spark.classList.add('click-spark');
   const emojis = ['🔥', '✨', '💕', '💫', '🌟'];
