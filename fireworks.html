@@ -120,103 +120,181 @@ const PALETTES = [
   ['#d50000','#ff6d00','#ffc400','#ffeb3b','#ffffff','#ffcc80'],
 ];
 
-// ========== 音效引擎 ==========
+// ========== 真实烟花音效引擎 ==========
 let audioCtx = null;
+let masterGain = null;
+
 function initAudio() {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 0.7;
+    masterGain.connect(audioCtx.destination);
   }
   if (audioCtx.state === 'suspended') {
     audioCtx.resume().catch(() => {});
   }
 }
-// 仅返回音频是否已激活
 function audioReady() {
   return audioCtx && audioCtx.state === 'running';
 }
 
-// 发射音效 — 渐升的咻声
+// --- 发射音：初始爆音 + 尖锐呼啸 ---
 function playLaunch() {
   if (!audioReady()) return;
   const t = audioCtx.currentTime;
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.type = 'sine';
-  osc.frequency.setValueAtTime(120, t);
-  osc.frequency.exponentialRampToValueAtTime(600, t + 0.25);
-  osc.frequency.exponentialRampToValueAtTime(1600, t + 0.5);
-  gain.gain.setValueAtTime(0.06, t);
-  gain.gain.exponentialRampToValueAtTime(0.1, t + 0.1);
-  gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.start(t);
-  osc.stop(t + 0.5);
+
+  // 发射瞬间的"砰" — 短促低频爆音
+  const pop = audioCtx.createOscillator();
+  const popGain = audioCtx.createGain();
+  pop.type = 'triangle';
+  pop.frequency.setValueAtTime(90, t);
+  pop.frequency.exponentialRampToValueAtTime(30, t + 0.06);
+  popGain.gain.setValueAtTime(0.18, t);
+  popGain.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+  pop.connect(popGain).connect(masterGain);
+  pop.start(t); pop.stop(t + 0.06);
+
+  // 呼啸上升 — 正弦+方波混合
+  const osc1 = audioCtx.createOscillator();
+  const osc2 = audioCtx.createOscillator();
+  const whistleGain = audioCtx.createGain();
+  osc1.type = 'sine';
+  osc2.type = 'sawtooth';
+  osc1.frequency.setValueAtTime(200, t + 0.03);
+  osc1.frequency.exponentialRampToValueAtTime(1800, t + 0.35);
+  osc2.frequency.setValueAtTime(100, t + 0.03);
+  osc2.frequency.exponentialRampToValueAtTime(900, t + 0.35);
+  whistleGain.gain.setValueAtTime(0.001, t);
+  whistleGain.gain.linearRampToValueAtTime(0.06, t + 0.06);
+  whistleGain.gain.linearRampToValueAtTime(0.1, t + 0.15);
+  whistleGain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+  osc1.connect(whistleGain);
+  osc2.connect(whistleGain);
+  whistleGain.connect(masterGain);
+  osc1.start(t); osc1.stop(t + 0.4);
+  osc2.start(t); osc2.stop(t + 0.4);
+
+  // 呼啸中的噪声音染
+  const nBuf = audioCtx.createBuffer(1, Math.floor(audioCtx.sampleRate * 0.35), audioCtx.sampleRate);
+  const nd = nBuf.getChannelData(0);
+  for (let i = 0; i < nd.length; i++) nd[i] = (Math.random() * 2 - 1);
+  const noiseSrc = audioCtx.createBufferSource();
+  noiseSrc.buffer = nBuf;
+  const nFilter = audioCtx.createBiquadFilter();
+  nFilter.type = 'bandpass';
+  nFilter.frequency.setValueAtTime(500, t);
+  nFilter.frequency.exponentialRampToValueAtTime(4000, t + 0.3);
+  nFilter.Q.value = 3;
+  const nGain = audioCtx.createGain();
+  nGain.gain.setValueAtTime(0.001, t);
+  nGain.gain.linearRampToValueAtTime(0.03, t + 0.08);
+  nGain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+  noiseSrc.connect(nFilter).connect(nGain).connect(masterGain);
+  noiseSrc.start(t); noiseSrc.stop(t + 0.35);
 }
 
-// 爆炸音效 — 低频轰 + 中频沙沙
+// --- 爆炸音：深沉的"轰隆" + 爆炸声浪 ---
 function playExplosion(intensity = 1) {
   if (!audioReady()) return;
   const t = audioCtx.currentTime;
-  const dur = 0.6 + intensity * 0.3;
+  const vol = 0.55 + intensity * 0.3;
 
-  // 低频轰鸣 (用方波+过滤模拟)
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  const filter = audioCtx.createBiquadFilter();
-  osc.type = 'sawtooth';
-  osc.frequency.setValueAtTime(80, t);
-  osc.frequency.exponentialRampToValueAtTime(20, t + dur);
-  filter.type = 'lowpass';
-  filter.frequency.setValueAtTime(200, t);
-  filter.frequency.exponentialRampToValueAtTime(40, t + dur);
-  gain.gain.setValueAtTime(0.15 * intensity, t);
-  gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
-  osc.connect(filter);
-  filter.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.start(t);
-  osc.stop(t + dur);
+  // 1) 超低频冲击波 — "咚" (sub-bass thump)
+  const sub = audioCtx.createOscillator();
+  const subGain = audioCtx.createGain();
+  sub.type = 'sine';
+  sub.frequency.setValueAtTime(45, t);
+  sub.frequency.exponentialRampToValueAtTime(18, t + 0.5);
+  subGain.gain.setValueAtTime(0.6 * intensity, t);
+  subGain.gain.exponentialRampToValueAtTime(0.3 * intensity, t + 0.08);
+  subGain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+  sub.connect(subGain).connect(masterGain);
+  sub.start(t); sub.stop(t + 0.5);
 
-  // 高频噼啪 (噪声模拟)
-  const bufSize = Math.floor(audioCtx.sampleRate * 0.25);
-  const noiseBuf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
-  const data = noiseBuf.getChannelData(0);
-  for (let i = 0; i < bufSize; i++) {
-    data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufSize, 3);
+  // 2) 中低频轰隆 — 锯齿波经低通滤波 (boom body)
+  const mid = audioCtx.createOscillator();
+  const midGain = audioCtx.createGain();
+  const midFilter = audioCtx.createBiquadFilter();
+  mid.type = 'sawtooth';
+  mid.frequency.setValueAtTime(120, t);
+  mid.frequency.exponentialRampToValueAtTime(25, t + 0.6);
+  midFilter.type = 'lowpass';
+  midFilter.frequency.setValueAtTime(350, t);
+  midFilter.frequency.exponentialRampToValueAtTime(60, t + 0.5);
+  midGain.gain.setValueAtTime(0.25 * intensity, t);
+  midGain.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
+  mid.connect(midFilter).connect(midGain).connect(masterGain);
+  mid.start(t); mid.stop(t + 0.6);
+
+  // 3) 爆炸噪声 — 模仿火药炸开的声浪
+  const bufLen = Math.floor(audioCtx.sampleRate * 0.6);
+  const expBuf = audioCtx.createBuffer(1, bufLen, audioCtx.sampleRate);
+  const expData = expBuf.getChannelData(0);
+  for (let i = 0; i < bufLen; i++) {
+    const env = Math.pow(1 - i / bufLen, 2.5);
+    expData[i] = (Math.random() * 2 - 1) * env;
   }
-  const noise = audioCtx.createBufferSource();
-  const noiseGain = audioCtx.createGain();
-  const noiseFilter = audioCtx.createBiquadFilter();
-  noise.buffer = noiseBuf;
-  noiseFilter.type = 'bandpass';
-  noiseFilter.frequency.setValueAtTime(3000, t);
-  noiseFilter.frequency.exponentialRampToValueAtTime(600, t + 0.2);
-  noiseGain.gain.setValueAtTime(0.06 * intensity, t);
-  noiseGain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
-  noise.connect(noiseFilter);
-  noiseFilter.connect(noiseGain);
-  noiseGain.connect(audioCtx.destination);
-  noise.start(t);
-  noise.stop(t + 0.25);
+  const expNoise = audioCtx.createBufferSource();
+  expNoise.buffer = expBuf;
+  const expFilter = audioCtx.createBiquadFilter();
+  expFilter.type = 'lowpass';
+  expFilter.frequency.setValueAtTime(2000, t);
+  expFilter.frequency.exponentialRampToValueAtTime(120, t + 0.5);
+  const expGain = audioCtx.createGain();
+  expGain.gain.setValueAtTime(0.22 * intensity, t);
+  expGain.gain.exponentialRampToValueAtTime(0.001, t + 0.55);
+  expNoise.connect(expFilter).connect(expGain).connect(masterGain);
+  expNoise.start(t); expNoise.stop(t + 0.55);
+
+  // 4) 高频"嘶嘶" — 短促的高频炸裂声
+  const hiBufLen = Math.floor(audioCtx.sampleRate * 0.2);
+  const hiBuf = audioCtx.createBuffer(1, hiBufLen, audioCtx.sampleRate);
+  const hiData = hiBuf.getChannelData(0);
+  for (let i = 0; i < hiBufLen; i++) {
+    hiData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / hiBufLen, 1.8);
+  }
+  const hiNoise = audioCtx.createBufferSource();
+  hiNoise.buffer = hiBuf;
+  const hiFilter = audioCtx.createBiquadFilter();
+  hiFilter.type = 'highpass';
+  hiFilter.frequency.setValueAtTime(1500, t);
+  hiFilter.frequency.exponentialRampToValueAtTime(6000, t + 0.05);
+  hiFilter.frequency.exponentialRampToValueAtTime(2000, t + 0.18);
+  const hiGain = audioCtx.createGain();
+  hiGain.gain.setValueAtTime(0.12 * intensity, t);
+  hiGain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+  hiNoise.connect(hiFilter).connect(hiGain).connect(masterGain);
+  hiNoise.start(t); hiNoise.stop(t + 0.18);
 }
 
-// 小的噼啪尾音
-function playCrackle(count = 8) {
+// --- 噼啪尾音：密集、随机的细碎爆裂 ---
+function playCrackle(count = 20) {
   if (!audioReady()) return;
   const t = audioCtx.currentTime;
   for (let i = 0; i < count; i++) {
-    const ct = t + Math.random() * 0.5;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = 'square';
-    osc.frequency.setValueAtTime(800 + Math.random() * 3000, ct);
-    gain.gain.setValueAtTime(0.02, ct);
-    gain.gain.exponentialRampToValueAtTime(0.001, ct + 0.04);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start(ct);
-    osc.stop(ct + 0.04);
+    const ct = t + Math.random() * 0.65;
+    const dur = 0.015 + Math.random() * 0.06;
+
+    // 每次噼啪用一小段噪音
+    const bufLen = Math.floor(audioCtx.sampleRate * dur);
+    const buf = audioCtx.createBuffer(1, bufLen, audioCtx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let j = 0; j < bufLen; j++) {
+      d[j] = (Math.random() * 2 - 1) * Math.pow(1 - j / bufLen, 1.5);
+    }
+    const src = audioCtx.createBufferSource();
+    src.buffer = buf;
+    const f = audioCtx.createBiquadFilter();
+    f.type = 'bandpass';
+    f.frequency.value = 2000 + Math.random() * 5000;
+    f.Q.value = 1 + Math.random() * 3;
+    const g = audioCtx.createGain();
+    const loudness = 0.02 + Math.random() * 0.08;
+    g.gain.setValueAtTime(loudness, ct);
+    g.gain.exponentialRampToValueAtTime(0.001, ct + dur);
+    src.connect(f).connect(g).connect(masterGain);
+    src.start(ct); src.stop(ct + dur);
   }
 }
 
@@ -280,7 +358,7 @@ class Rocket {
     if (this.vy >= 0 || this.y <= this.targetY) {
       this.exploded = true;
       playExplosion(0.7 + Math.random() * 0.6);
-      if (Math.random() < 0.5) playCrackle(randInt(5, 14));
+      playCrackle(randInt(18, 35));
       return this.explode();
     }
     return null;
@@ -421,9 +499,7 @@ function launchSalvo(count) {
 
 // 首次交互激活音频
 function activateAudio() {
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
+  initAudio();
   if (audioCtx.state === 'suspended') {
     audioCtx.resume().then(() => {
       console.log('🔊 音频已激活');
